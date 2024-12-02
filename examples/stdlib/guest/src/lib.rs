@@ -16,10 +16,11 @@ use predictions::{Scaler, LinearRegressionModel, RidgeRegressionModel, Polynomia
 
 #[derive(Serialize, Deserialize)]
 pub struct ModelInput {
-    pub test_features: Vec<Vec<f32>>,
-    pub actual_amounts: Vec<f32>,
+    // pub test_features: Vec<Vec<f32>>,
+    // pub actual_amounts: Vec<f32>,
     pub scaler: Scaler,
-    pub poly_ridge_model: PolynomialRidgeRegressionModel
+    pub poly_ridge_model: PolynomialRidgeRegressionModel,
+    pub x: Array2<f32>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -55,20 +56,25 @@ impl From<serde_json::Error> for MyError {
     }
 }
 
-#[jolt::provable(max_input_size = 100000, max_output_size = 100000, stack_size = 1844600000000000000, memory_size = 18446000000000000000)] pub fn load_model(model_input: ModelInput) -> Result<Vec<f32>, MyError> {
-    
-    if model_input.test_features.is_empty() {
-        return Err(MyError::InvalidInput("Test features vector is empty.".into()));
-    }
-
-    let num_samples = model_input.test_features.len();
-    let num_features = model_input.test_features[0].len();
-    let flat_features: Vec<f32> = model_input.test_features.into_iter().flatten().collect();
+pub fn flatten(test_features: Vec<Vec<f32>>) -> Result<Array2<f32>, MyError> {
+     
+    let num_samples = test_features.len();
+    let num_features = test_features[0].len();
+    let flat_features: Vec<f32> = test_features.into_iter().flatten().collect();
     let x: Array2<f32> = Array2::from_shape_vec((num_samples, num_features), flat_features)
         .expect("Failed to create Array2 from shape");
 
+   Ok(x) 
+}
 
-    let X_scaled = model_input.scaler.transform(&x);
+#[jolt::provable(max_input_size = 100000, max_output_size = 100000, stack_size = 1844600000000000000, memory_size = 18446000000000000000)] 
+pub fn load_model(model_input: ModelInput) -> Result<Vec<f32>, MyError> {
+    //
+    // if model_input.test_features.is_empty() {
+    //     return Err(MyError::InvalidInput("Test features vector is empty.".into()));
+    // }
+
+    let X_scaled = model_input.scaler.transform(&model_input.x);
     
     // Make predictions
     // let linear_pred = model_input.linear_model.predict(&X_scaled);

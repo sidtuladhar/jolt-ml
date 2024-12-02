@@ -1,4 +1,4 @@
-use guest::{read_models, read_test_dataset, ModelInput};
+use guest::{read_models, read_test_dataset, flatten, ModelInput};
 
 
 pub fn main() {
@@ -17,11 +17,14 @@ pub fn main() {
         return; // Exit or take alternative action
     };
 
+    let Ok(x) = flatten(test_features) else { todo!() };
+
     let model_input = ModelInput {
-        test_features,
-        actual_amounts,
+        // test_features,
+        // actual_amounts,
         scaler,
         poly_ridge_model,
+        x
     };
     println!("CREATING PROOF");
     // guest::load_model(model_input);
