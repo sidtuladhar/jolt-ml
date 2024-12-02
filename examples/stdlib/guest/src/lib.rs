@@ -16,11 +16,9 @@ use predictions::{Scaler, LinearRegressionModel, RidgeRegressionModel, Polynomia
 
 #[derive(Serialize, Deserialize)]
 pub struct ModelInput {
-    pub test_features: Vec<Vec<f64>>,
-    pub actual_amounts: Vec<f64>,
+    pub test_features: Vec<Vec<f32>>,
+    pub actual_amounts: Vec<f32>,
     pub scaler: Scaler,
-    pub linear_model: LinearRegressionModel,
-    pub ridge_model: RidgeRegressionModel,
     pub poly_ridge_model: PolynomialRidgeRegressionModel
 }
 
@@ -57,8 +55,7 @@ impl From<serde_json::Error> for MyError {
     }
 }
 
-#[jolt::provable(max_input_size = 1000000000, max_output_size = 100000, stack_size = 10000000, memory_size = 10000000000)]
-pub fn load_model(model_input: ModelInput) -> Result<Vec<f64>, MyError> {
+#[jolt::provable(max_input_size = 100000, max_output_size = 100000, stack_size = 1844600000000000000, memory_size = 18446000000000000000)] pub fn load_model(model_input: ModelInput) -> Result<Vec<f32>, MyError> {
     
     if model_input.test_features.is_empty() {
         return Err(MyError::InvalidInput("Test features vector is empty.".into()));
@@ -66,20 +63,19 @@ pub fn load_model(model_input: ModelInput) -> Result<Vec<f64>, MyError> {
 
     let num_samples = model_input.test_features.len();
     let num_features = model_input.test_features[0].len();
-    let flat_features: Vec<f64> = model_input.test_features.into_iter().flatten().collect();
-    let x: Array2<f64> = Array2::from_shape_vec((num_samples, num_features), flat_features)
+    let flat_features: Vec<f32> = model_input.test_features.into_iter().flatten().collect();
+    let x: Array2<f32> = Array2::from_shape_vec((num_samples, num_features), flat_features)
         .expect("Failed to create Array2 from shape");
-    println!("Data converted to Array2<64>");
 
 
     let X_scaled = model_input.scaler.transform(&x);
     
     // Make predictions
-    let linear_pred = model_input.linear_model.predict(&X_scaled);
-    let ridge_pred = model_input.ridge_model.predict(&X_scaled);
+    // let linear_pred = model_input.linear_model.predict(&X_scaled);
+    // let ridge_pred = model_input.ridge_model.predict(&X_scaled);
     let poly_ridge_pred = model_input.poly_ridge_model.predict(&X_scaled);
     
-    let combined_predictions = vec![linear_pred.clone(), ridge_pred.clone(), poly_ridge_pred.clone()];
+    let combined_predictions = vec![poly_ridge_pred.clone()];
 
     // println!("Linear Regression Prediction: {}", linear_pred[0]);
     // println!("Ridge Regression Prediction: {}", ridge_pred[0]);
@@ -124,24 +120,24 @@ pub fn load_model(model_input: ModelInput) -> Result<Vec<f64>, MyError> {
     //
 }
 
-fn compute_mae(predictions: &ndarray::Array1<f64>, actuals: &Vec<f64>) -> f64 {
+fn compute_mae(predictions: &ndarray::Array1<f32>, actuals: &Vec<f32>) -> f32 {
     let errors = predictions.iter().zip(actuals.iter()).map(|(p, a)| (p - a).abs());
-    errors.sum::<f64>() / predictions.len() as f64
+    errors.sum::<f32>() / predictions.len() as f32
 }
 
-fn compute_mse(predictions: &ndarray::Array1<f64>, actuals: &Vec<f64>) -> f64 {
+fn compute_mse(predictions: &ndarray::Array1<f32>, actuals: &Vec<f32>) -> f32 {
     let errors = predictions.iter().zip(actuals.iter()).map(|(p, a)| (p - a).powi(2));
-    errors.sum::<f64>() / predictions.len() as f64
+    errors.sum::<f32>() / predictions.len() as f32
 }
 
-fn compute_r2(predictions: &ndarray::Array1<f64>, actuals: &Vec<f64>) -> f64 {
-    let actual_mean = actuals.iter().sum::<f64>() / actuals.len() as f64;
-    let ss_tot: f64 = actuals.iter().map(|a| (*a - actual_mean).powi(2)).sum();
-    let ss_res: f64 = predictions.iter().zip(actuals.iter()).map(|(p, a)| (*a - p).powi(2)).sum();
+fn compute_r2(predictions: &ndarray::Array1<f32>, actuals: &Vec<f32>) -> f32 {
+    let actual_mean = actuals.iter().sum::<f32>() / actuals.len() as f32;
+    let ss_tot: f32 = actuals.iter().map(|a| (*a - actual_mean).powi(2)).sum();
+    let ss_res: f32 = predictions.iter().zip(actuals.iter()).map(|(p, a)| (*a - p).powi(2)).sum();
     1.0 - (ss_res / ss_tot)
 }
 
-pub fn read_test_dataset() -> Result<(Vec<Vec<f64>>, Vec<f64>), MyError> {
+pub fn read_test_dataset() -> Result<(Vec<Vec<f32>>, Vec<f32>), MyError> {
     match env::current_dir() {
             Ok(path) => println!("Current working directory: {}", path.display()),
             Err(e) => eprintln!("Error getting current directory: {}", e),

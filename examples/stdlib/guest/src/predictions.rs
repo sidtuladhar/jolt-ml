@@ -6,8 +6,8 @@ use crate::models::{LinearRegressionParams, RidgeRegressionParams, PolynomialRid
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scaler {
-    mean: Array1<f64>,
-    scale: Array1<f64>,
+    mean: Array1<f32>,
+    scale: Array1<f32>,
 }
 
 impl Scaler {
@@ -18,15 +18,15 @@ impl Scaler {
         }
     }
 
-    pub fn transform(&self, input: &Array2<f64>) -> Array2<f64> {
+    pub fn transform(&self, input: &Array2<f32>) -> Array2<f32> {
         // (X - mean) / scale
         (input - &self.mean) / &self.scale
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LinearRegressionModel {
-    coefficients: Array1<f64>,
-    intercept: f64,
+    coefficients: Array1<f32>,
+    intercept: f32,
 }
 
 impl LinearRegressionModel {
@@ -37,14 +37,14 @@ impl LinearRegressionModel {
         }
     }
 
-    pub fn predict(&self, X: &Array2<f64>) -> Array1<f64> {
+    pub fn predict(&self, X: &Array2<f32>) -> Array1<f32> {
         X.dot(&self.coefficients) + self.intercept
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RidgeRegressionModel {
-    coefficients: Array1<f64>,
-    intercept: f64,
+    coefficients: Array1<f32>,
+    intercept: f32,
 }
 
 impl RidgeRegressionModel {
@@ -55,14 +55,14 @@ impl RidgeRegressionModel {
         }
     }
 
-    pub fn predict(&self, x: &Array2<f64>) -> Array1<f64> {
+    pub fn predict(&self, x: &Array2<f32>) -> Array1<f32> {
         x.dot(&self.coefficients) + self.intercept
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PolynomialRidgeRegressionModel {
-    coefficients: Array1<f64>,
-    intercept: f64,
+    coefficients: Array1<f32>,
+    intercept: f32,
     feature_names: Vec<String>,
 }
 
@@ -75,12 +75,12 @@ impl PolynomialRidgeRegressionModel {
         }
     }
 
-    pub fn predict(&self, x: &Array2<f64>) -> Array1<f64> {
+    pub fn predict(&self, x: &Array2<f32>) -> Array1<f32> {
         // Assuming X has been preprocessed (scaled)
         // Generate polynomial features manually
         // For degree=2, include squares and pairwise products
 
-        let mut X_poly = Array2::<f64>::zeros((x.shape()[0], self.feature_names.len()));
+        let mut X_poly = Array2::<f32>::zeros((x.shape()[0], self.feature_names.len()));
         
         for (i, row) in x.outer_iter().enumerate() {
             for (j, feature_name) in self.feature_names.iter().enumerate() {

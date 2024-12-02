@@ -21,8 +21,6 @@ pub fn main() {
         test_features,
         actual_amounts,
         scaler,
-        linear_model,
-        ridge_model,
         poly_ridge_model,
     };
     println!("CREATING PROOF");
