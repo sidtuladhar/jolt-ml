@@ -1,5 +1,9 @@
 // src/predictions.rs
+#![cfg_attr(feature = "guest", no_std)]
+
 use serde::{Deserialize, Serialize};
+extern crate alloc;
+use alloc::vec::Vec;
 
 use ndarray::prelude::*;
 use crate::models::{LinearRegressionParams, RidgeRegressionParams, PolynomialRidgeRegressionParams, ScalerParams};

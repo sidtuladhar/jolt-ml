@@ -43,7 +43,11 @@ name = "alloc"
 version = "0.1.0"
 dependencies = [
  "alloc-guest",
+ "csv",
  "jolt-sdk",
+ "ndarray",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -51,6 +55,7 @@ name = "alloc-guest"
 version = "0.1.0"
 dependencies = [
  "jolt-sdk",
+ "serde",
 ]
 
 [[package]]
@@ -1326,6 +1331,15 @@ dependencies = [
  "ff",
  "rand_core 0.6.4",
  "subtle",
+]
+
+[[package]]
+name = "guest"
+version = "0.1.0"
+dependencies = [
+ "jolt-sdk",
+ "ndarray",
+ "serde",
 ]
 
 [[package]]
@@ -3354,15 +3368,8 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 name = "stdlib"
 version = "0.1.0"
 dependencies = [
- "jolt-sdk",
- "stdlib-guest",
-]
-
-[[package]]
-name = "stdlib-guest"
-version = "0.1.0"
-dependencies = [
  "csv",
+ "guest",
  "jolt-sdk",
  "ndarray",
  "serde",

@@ -8,3 +8,6 @@ guest = []
 
 [dependencies]
 jolt = { package = "jolt-sdk", path = "../../../jolt-sdk" }
+serde = { version = "1.0", default-features = false, features = ["alloc"] }
+
+

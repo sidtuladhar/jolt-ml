@@ -1,10 +1,37 @@
+#![cfg_attr(feature = "guest", no_std)]
 use serde::{Deserialize, Serialize};
 
 extern crate alloc;
 use alloc::vec::Vec;
 
-use crate::predictions::{Scaler, LinearRegressionModel, RidgeRegressionModel, PolynomialRidgeRegressionModel};
+use guest::predictions;
 
+impl From<ScalerParams> for predictions::ScalerParams {
+    fn from(params: ScalerParams) -> predictions::ScalerParams {
+        predictions::ScalerParams {
+            mean: params.mean,
+            scale: params.scale,
+        }
+    }
+}
+
+impl From<LinearRegressionParams> for predictions::LinearRegressionParams {
+    fn from(params: LinearRegressionParams) -> predictions::LinearRegressionParams {
+        predictions::LinearRegressionParams {
+            coefficients: params.coefficients,
+            intercept: params.intercept,
+        }
+    }
+}
+
+impl From<RidgeRegressionParams> for predictions::RidgeRegressionParams {
+    fn from(params: RidgeRegressionParams) -> predictions::RidgeRegressionParams {
+        predictions::RidgeRegressionParams {
+            coefficients: params.coefficients,
+            intercept: params.intercept,
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 pub struct LinearRegressionParams {
@@ -22,7 +49,6 @@ pub struct RidgeRegressionParams {
 pub struct PolynomialRidgeRegressionParams {
     pub coefficients: Vec<f32>,
     pub intercept: f32,
-    pub feature_names: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
