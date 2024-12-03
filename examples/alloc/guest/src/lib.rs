@@ -11,7 +11,6 @@ use predictions::{Scaler, LinearRegressionModel, RidgeRegressionModel};
 
 #[derive(Serialize, Deserialize)]
 pub struct ModelInput {
-    pub test: f32,
     pub scaler: Scaler,
     pub ridge_model: RidgeRegressionModel,
     pub x: Vec<Vec<f32>>
@@ -27,7 +26,7 @@ fn alloc(n: u32) -> u32 {
     v[n as usize]
 }
 
-#[jolt::provable]
+#[jolt::provable(max_input_size = 10000000)]
 pub fn load_model(model_input: ModelInput) -> Vec<f32> {
     let X_scaled = model_input.scaler.transform(&model_input.x);
     
@@ -35,7 +34,6 @@ pub fn load_model(model_input: ModelInput) -> Vec<f32> {
     // let poly_ridge_pred = model_input.poly_ridge_model.predict(&X_scaled);
     
     let combined_predictions = vec![ridge_pred.clone()];
-
     combined_predictions.into_iter().flat_map(|array| array.to_vec()).collect()
 } 
 

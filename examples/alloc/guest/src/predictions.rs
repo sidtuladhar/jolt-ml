@@ -24,7 +24,7 @@ pub struct ScalerParams {
     pub scale: Vec<f32>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Scaler {
     mean: Vec<f32>,
     scale: Vec<f32>,
@@ -52,7 +52,7 @@ impl Scaler {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinearRegressionModel {
     coefficients: Vec<f32>,
     intercept: f32,
@@ -79,7 +79,7 @@ impl LinearRegressionModel {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RidgeRegressionModel {
     coefficients: Vec<f32>,
     intercept: f32,

@@ -52,7 +52,7 @@ pub fn read_test_dataset() -> Result<(Vec<Vec<f32>>, Vec<f32>), MyError> {
             Ok(path) => println!("Current working directory: {}", path.display()),
             Err(e) => eprintln!("Error getting current directory: {}", e),
     }
-    let mut file = File::open("./guest/model/Test_Dataset.csv").expect("Test_Dataset.csv not found.");
+    let mut file = File::open("./examples/alloc/guest/model/Test_Dataset.csv").expect("Test_Dataset.csv not found.");
     let mut contents = String::new();
     file.read_to_string(&mut contents).expect("Failed to read Test_Dataset.csv");
 
@@ -143,7 +143,7 @@ pub fn read_models(
     poly_ridge_model_path: &str,
 ) -> Result<(Scaler, LinearRegressionModel, RidgeRegressionModel), MyError> {
     match env::current_dir() {
-            Ok(path) => println!("Current working directory: {}", path.display()),
+            Ok(path) => println!("Current working directory in read_model: {}", path.display()),
             Err(e) => eprintln!("Error getting current directory: {}", e),
     }
     // Read and deserialize Scaler
@@ -183,12 +183,39 @@ pub fn read_models(
 
 
 pub fn main() {
+    let scaler_path = "./examples/alloc/guest/model/scaler_params.json";
+    let linear_model_path = "./examples/alloc/guest/model/linear_regression_params.json";
+    let ridge_model_path = "./examples/alloc/guest/model/ridge_regression_params.json";
+    let poly_ridge_model_path = "./examples/alloc/guest/model/polynomial_ridge_regression_params.json";
 
+    // Read the test dataset
+    let Ok((x, actual_amounts)) = read_test_dataset() else { todo!() };
+    // println!("test: {:?}", test_features);
+    // Read the models
+    let Ok((scaler, linear_model, ridge_model)) =
+    read_models(scaler_path, linear_model_path, ridge_model_path, poly_ridge_model_path) else {
+       
+        eprintln!("{:?}", read_models(scaler_path, linear_model_path, ridge_model_path, poly_ridge_model_path));
+
+        return; // Exit or take alternative action
+    };
+
+    //let Ok(x) = flatten(test_features) else { todo!() };
+
+     let model_input = ModelInput {
+        // test_features,
+        // actual_amounts,
+        scaler,
+        ridge_model,
+        x 
+    };
+
+    // guest::load_model(model_input);
     
     let (prove_alloc, verify_alloc) = guest::build_alloc();
     let (prove_model, verify_model) = guest::build_load_model();
 
-    let (model_output, model_proof) = prove_model()
+    let (model_output, model_proof) = prove_model(model_input);
 
     let (output, proof) = prove_alloc(41);
     let is_valid = verify_alloc(proof);
